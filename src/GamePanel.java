@@ -4,7 +4,6 @@ import java.awt.event.*;
 import java.util.Random;
 
 
-
 public class GamePanel extends JPanel implements ActionListener {
     static final int SCREEN_WIDTH = 600;
     static final int SCREEN_HEIGHT = 600;
@@ -17,6 +16,10 @@ public class GamePanel extends JPanel implements ActionListener {
     int appleEaten;
     int appleX;
     int appleY;
+    int GoldenAppleX;
+    int GoldenAppleY;
+    int GoldenAppleTimer = 0;
+    boolean GoldenAppleVisible = false;
     char direction = 'R';
     boolean running = false;
     Timer timer;
@@ -46,10 +49,10 @@ public class GamePanel extends JPanel implements ActionListener {
 
     public void draw(Graphics g) {
         //grid
-        /*for (int i = 0; i < SCREEN_HEIGHT / UNIT_SIZE; i++) {
+        for (int i = 0; i < SCREEN_HEIGHT / UNIT_SIZE; i++) {
             g.drawLine(i * UNIT_SIZE, 0, i * UNIT_SIZE, SCREEN_HEIGHT);
             g.drawLine(0, i * UNIT_SIZE, SCREEN_WIDTH, i * UNIT_SIZE);
-        }*/
+        }
         g.setColor(Color.RED);
         g.fillOval(appleX, appleY, UNIT_SIZE, UNIT_SIZE);
 
@@ -65,12 +68,37 @@ public class GamePanel extends JPanel implements ActionListener {
                 g.fillRect(x[i], y[i], UNIT_SIZE, UNIT_SIZE);
             }
         }
+        if (GoldenAppleVisible) {
+            g.setColor(new Color(255, 215, 0));
+            g.fillOval(GoldenAppleX, GoldenAppleY, UNIT_SIZE, UNIT_SIZE);
+        }
     }
 
     // generate new apple
     public void newApple() {
         appleX = random.nextInt((int) (SCREEN_WIDTH / UNIT_SIZE)) * UNIT_SIZE;
         appleY = random.nextInt((int) (SCREEN_HEIGHT / UNIT_SIZE)) * UNIT_SIZE;
+    }
+
+    public void newGoldenApple() {
+        GoldenAppleX = random.nextInt((int) (SCREEN_WIDTH / UNIT_SIZE)) * UNIT_SIZE;
+        GoldenAppleY = random.nextInt((int) (SCREEN_HEIGHT / UNIT_SIZE)) * UNIT_SIZE;
+    }
+
+    private void handleGoldenApple() {
+        GoldenAppleTimer += DELAY;
+
+        // Show large apple every 20 seconds
+        if (GoldenAppleTimer >= 20000) {
+            if (!GoldenAppleVisible) {
+                newGoldenApple();
+                GoldenAppleVisible = true;
+            }
+
+            GoldenAppleTimer = 0;
+
+
+        }
     }
 
     public void move() {
@@ -118,6 +146,16 @@ public class GamePanel extends JPanel implements ActionListener {
         }
     }
 
+    public void checkGoldenApple() {
+        if ((x[0] == GoldenAppleX) && (y[0] == GoldenAppleY)) {
+            bodyParts = bodyParts + 5;
+            appleEaten = appleEaten + 5;
+            GoldenAppleVisible = false;
+            GoldenAppleTimer = 0;
+        }
+
+    }
+
     public void gameOver() {
 
     }
@@ -156,6 +194,8 @@ public class GamePanel extends JPanel implements ActionListener {
             move();
             checkCollision();
             checkApple();
+            checkGoldenApple();
+            handleGoldenApple();
 
         }
         repaint();
