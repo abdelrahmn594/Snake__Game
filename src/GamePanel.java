@@ -24,6 +24,7 @@ public class GamePanel extends JPanel implements ActionListener {
     boolean running = false;
     Timer timer;
     Random random;
+    boolean paused = false;
 
     GamePanel() {
         random = new Random();
@@ -165,23 +166,37 @@ public class GamePanel extends JPanel implements ActionListener {
         public void keyPressed(KeyEvent e) {
             switch (e.getKeyCode()) {
                 case KeyEvent.VK_LEFT:
-                    if (direction != 'R') {
+                    if (!paused && direction != 'R') {
                         direction = 'L';
                     }
                     break;
                 case KeyEvent.VK_RIGHT:
-                    if (direction != 'L') {
+                    if (!paused && direction != 'L') {
                         direction = 'R';
                     }
                     break;
                 case KeyEvent.VK_UP:
-                    if (direction != 'D') {
+                    if (!paused && direction != 'D') {
                         direction = 'U';
                     }
                     break;
                 case KeyEvent.VK_DOWN:
-                    if (direction != 'U') {
+                    if (!paused && direction != 'U') {
                         direction = 'D';
+                    }
+                    break;
+                case KeyEvent.VK_ESCAPE:
+                    if (running && !paused) {
+                        paused = true;
+                        running = false;
+                        timer.stop();
+                    }
+                    break;
+                case KeyEvent.VK_ENTER:
+                    if (!running && paused) {
+                        paused = false;
+                        running = true;
+                        timer.start();
                     }
                     break;
             }
@@ -190,7 +205,7 @@ public class GamePanel extends JPanel implements ActionListener {
 
     @Override
     public void actionPerformed(ActionEvent e) {
-        if (running) {
+        if (running && !paused) {
             move();
             checkCollision();
             checkApple();
